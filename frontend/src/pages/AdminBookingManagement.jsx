@@ -141,10 +141,10 @@ const AdminBookingManagement = () => {
                       </div>
                     </div>
 
-                    <div className="text-left text-gray-700 font-medium text-[14px] pr-2 break-words">
+                    <div className="text-left text-gray-700 font-medium text-[14px] pr-2 min-w-0">
                       <div className="flex items-start">
                         <MapPin size={16} className="mr-1.5 mt-0.5 shrink-0 text-red-500" />
-                        <span className="leading-snug">{booking.address}</span>
+                        <span className="leading-snug break-all">{booking.address}</span>
                       </div>
                     </div>
                     

@@ -14,7 +14,7 @@ const FarmerDashboard = () => {
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     } else {
-      setUser({ name: 'રમેશભાઈ', full_name: 'રમેશભાઈ પટેલ' });
+      setUser({ name: 'ખેડૂત મિત્ર' });
     }
 
     const fetchPopularTools = async () => {
@@ -36,8 +36,8 @@ const FarmerDashboard = () => {
   };
 
   if (!user) return null;
-  const firstName = user.name || user.full_name?.split(' ')[0] || 'રમેશભાઈ';
-  const fullName = user.full_name || 'રમેશભાઈ પટેલ';
+  const firstName = user.name?.split(' ')[0] || 'ખેડૂત';
+  const fullName = user.name || 'ખેડૂત મિત્ર';
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-[#e6fcf0]">
@@ -105,29 +105,29 @@ const FarmerDashboard = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             
             <Link to="/tractor" className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center p-6 hover:shadow-md transition-shadow cursor-pointer group">
-              <div className="w-20 h-20 rounded-full bg-green-50 mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <img src="https://cdn-icons-png.flaticon.com/512/2884/2884813.png" alt="Tractor" className="w-12 h-12 opacity-80" />
+              <div className="w-24 h-24 rounded-full overflow-hidden border-[3px] border-gray-100 mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <img src="/farmer_images/John deere 5310.jpg" alt="Tractor" className="w-full h-full object-cover" />
               </div>
               <span className="font-extrabold text-gray-800 text-lg">ટ્રેક્ટર</span>
             </Link>
 
             <Link to="/sowing" className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center p-6 hover:shadow-md transition-shadow cursor-pointer group">
-              <div className="w-20 h-20 rounded-full bg-yellow-50 mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <img src="https://cdn-icons-png.flaticon.com/512/3063/3063098.png" alt="Sowing" className="w-12 h-12 opacity-80" />
+              <div className="w-24 h-24 rounded-full overflow-hidden border-[3px] border-gray-100 mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <img src="/farmer_images/Seed cum Fertilizer Drill_.jpg" alt="Sowing" className="w-full h-full object-cover" />
               </div>
               <span className="font-extrabold text-gray-800 text-lg">વાવણી સાધન</span>
             </Link>
 
             <Link to="/pruning" className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center p-6 hover:shadow-md transition-shadow cursor-pointer group">
-              <div className="w-20 h-20 rounded-full bg-orange-50 mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <img src="https://cdn-icons-png.flaticon.com/512/2664/2664536.png" alt="Harvesting" className="w-12 h-12 opacity-80" />
+              <div className="w-24 h-24 rounded-full overflow-hidden border-[3px] border-gray-100 mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <img src="/farmer_images/Combine Harvester_.jpg" alt="Harvesting" className="w-full h-full object-cover" />
               </div>
               <span className="font-extrabold text-gray-800 text-lg">કાપણી સાધન</span>
             </Link>
 
             <Link to="/thresher" className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center p-6 hover:shadow-md transition-shadow cursor-pointer group">
-              <div className="w-20 h-20 rounded-full bg-blue-50 mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <img src="https://cdn-icons-png.flaticon.com/512/6283/6283181.png" alt="Thresher" className="w-12 h-12 opacity-80" />
+              <div className="w-24 h-24 rounded-full overflow-hidden border-[3px] border-gray-100 mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <img src="/farmer_images/Electric Corn Threshr_.jpg" alt="Thresher" className="w-full h-full object-cover" />
               </div>
               <span className="font-extrabold text-gray-800 text-lg">થ્રેશર</span>
             </Link>
@@ -141,8 +141,12 @@ const FarmerDashboard = () => {
             
             {popularTools.map((tool) => (
               <div key={tool.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden hover:shadow-md transition-shadow">
-                <div className="h-48 overflow-hidden bg-gray-100">
-                  <img src={tool.image} alt={tool.name} className="w-full h-full object-cover" />
+                <div className="w-full h-56 bg-[#f4f7f5] flex items-center justify-center overflow-hidden border-b border-gray-100">
+                  <img 
+                    src={tool.image} 
+                    alt={tool.name} 
+                    className="max-h-full max-w-full object-contain mix-blend-multiply p-2 transition-transform duration-500 hover:scale-105"
+                  />
                 </div>
                 <div className="p-6 flex flex-col flex-grow">
                   <h3 className="text-xl font-extrabold text-gray-900 mb-2">{tool.name}</h3>

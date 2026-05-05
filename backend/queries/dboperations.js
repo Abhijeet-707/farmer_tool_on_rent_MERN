@@ -7,11 +7,11 @@ const registerUser = (request, response) => {
         if (results.rows.length > 0) return response.status(400).json({ message: "આ મોબાઇલ નંબર પહેલેથી જ નોંધાયેલ છે." });
 
         pool.query(
-            "INSERT INTO users (full_name, village, mobile, password) VALUES ($1, $2, $3, $4) RETURNING id, full_name, role", 
+            "INSERT INTO users (full_name, village, mobile, password) VALUES ($1, $2, $3, $4) RETURNING id, full_name", 
             [fullName, village, mobile, password], 
             (error, results) => {
                 if(error) return response.status(500).json({ error: error.message });
-                response.status(200).json({ success: true, message: "ખાતું સફળતાપૂર્વક બનાવવામાં આવ્યું છે.", user: results.rows[0] });
+                response.status(200).json({ success: true, message: "ખાતું સફળતાપૂર્વક બનાવવામાં આવ્યું છે.", user: { ...results.rows[0], role: 'farmer' } });
             }
         );
     });
@@ -23,9 +23,22 @@ const loginUser = (request, response) => {
         if(error) return response.status(500).json({ error: error.message });
         if (results.rows.length > 0) {
             const user = results.rows[0];
-            response.status(200).json({ success: true, message: "લૉગિન સફળ.", user: { id: user.id, name: user.full_name, role: user.role } });
+            response.status(200).json({ success: true, message: "લૉગિન સફળ.", user: { id: user.id, name: user.full_name, role: 'farmer' } });
         } else {
             response.status(401).json({ success: false, message: "અમાન્ય મોબાઇલ નંબર અથવા પાસવર્ડ." });
+        }
+    });
+};
+
+const adminLogin = (request, response) => {
+    const { username, password } = request.body;
+    pool.query("SELECT * FROM admins WHERE username = $1 AND password = $2", [username, password], (error, results) => {
+        if(error) return response.status(500).json({ error: error.message });
+        if (results.rows.length > 0) {
+            const admin = results.rows[0];
+            response.status(200).json({ success: true, message: "લૉગિન સફળ.", user: { id: admin.id, name: admin.username, role: 'admin' } });
+        } else {
+            response.status(401).json({ success: false, message: "અમાન્ય ઍડમિન ID અથવા પાસવર્ડ." });
         }
     });
 };
@@ -94,6 +107,7 @@ const getAllBookings = (req, res) => {
     pool.query(
         `SELECT b.*, t.name as tool_name, t.image as tool_image, u.full_name as renter_name, u.mobile as renter_mobile 
          FROM bookings b JOIN tools t ON b.tool_id = t.id JOIN users u ON b.renter_id = u.id 
+         WHERE b.admin_hidden = false
          ORDER BY b.created_at DESC`,
         (error, results) => {
             if(error) return res.status(500).json({ error: error.message });
@@ -131,14 +145,14 @@ const updateBookingStatus = (req, res) => {
 
 const deleteBooking = (req, res) => {
     const { id } = req.params;
-    pool.query("DELETE FROM bookings WHERE id=$1", [id], (error, results) => {
+    pool.query("UPDATE bookings SET admin_hidden = true WHERE id=$1", [id], (error, results) => {
         if(error) return res.status(500).json({ error: error.message });
-        res.status(200).json({ success: true, message: "Booking deleted" });
+        res.status(200).json({ success: true, message: "Booking hidden from admin panel" });
     });
 };
 
 module.exports = {
-    registerUser, loginUser,
+    registerUser, loginUser, adminLogin,
     getAllTools, addTool, updateTool, deleteTool,
     createBooking, getAllBookings, getFarmerBookings, updateBookingStatus, deleteBooking
 };

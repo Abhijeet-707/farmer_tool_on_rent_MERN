@@ -14,7 +14,7 @@ const TractorCategory = () => {
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     } else {
-      setUser({ name: 'રમેશભાઈ', full_name: 'રમેશભાઈ પટેલ' });
+      setUser({ name: 'ખેડૂત મિત્ર' });
     }
 
     const fetchTools = async () => {
@@ -34,7 +34,7 @@ const TractorCategory = () => {
   };
 
   if (!user) return null;
-  const fullName = user.full_name || user.name || 'રમેશભાઈ પટેલ';
+  const fullName = user.name || 'ખેડૂત મિત્ર';
 
 
   return (

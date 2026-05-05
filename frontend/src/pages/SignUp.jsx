@@ -10,12 +10,38 @@ const SignUp = () => {
   const [village, setVillage] = useState('');
   const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
+    
+    // Determine and validate if input is email or phone number
+    if (mobile.includes('@')) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(mobile)) {
+        setError('કૃપા કરીને યોગ્ય ઈમેલ આઈડી દાખલ કરો.');
+        return;
+      }
+    } else {
+      const phoneRegex = /^\d+$/;
+      if (!phoneRegex.test(mobile)) {
+        setError('કૃપા કરીને યોગ્ય 10 આંકડાનો મોબાઇલ નંબર અથવા ઈમેલ દાખલ કરો.');
+        return;
+      }
+      if (mobile.length !== 10) {
+        setError('મોબાઇલ નંબર બરાબર 10 આંકડાનો હોવો જોઈએ.');
+        return;
+      }
+    }
+    
+    if (password !== confirmPassword) {
+      setError('બંને પાસવર્ડ મેળ ખાતા નથી. કૃપા કરીને ફરી તપાસો!');
+      return;
+    }
+    
     try {
       const res = await axios.post('http://localhost:5000/api/register', { fullName, village, mobile, password });
       if (res.status === 200) {
@@ -93,9 +119,9 @@ const SignUp = () => {
               </div>
 
               <div>
-                <label className="block text-[#1a1a1a] font-semibold text-[15px] mb-2">મોબાઇલ નંબર</label>
+                <label className="block text-[#1a1a1a] font-semibold text-[15px] mb-2">મોબાઇલ નંબર / ઈમેલ</label>
                 <input 
-                  type="tel" 
+                  type="text" 
                   value={mobile}
                   onChange={(e) => setMobile(e.target.value)}
                   placeholder=""
@@ -110,6 +136,18 @@ const SignUp = () => {
                   type="password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  placeholder=""
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-[var(--color-brand-green)] focus:ring-1 focus:ring-[var(--color-brand-green)] text-gray-800 placeholder-gray-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[#1a1a1a] font-semibold text-[15px] mb-2">પાસવર્ડની ખાતરી કરો</label>
+                <input 
+                  type="password" 
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder=""
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-[var(--color-brand-green)] focus:ring-1 focus:ring-[var(--color-brand-green)] text-gray-800 placeholder-gray-400"

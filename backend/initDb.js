@@ -15,7 +15,7 @@ async function initializeDB() {
     // Check if database exists
     const res = await defaultClient.query("SELECT datname FROM pg_database WHERE datname = 'farmer_tool_rent'");
     if (res.rows.length === 0) {
-      console.log('Creating database farmer_tool_rent...');
+      console.log('Creating database farmer_tool_rent...'); 
       await defaultClient.query('CREATE DATABASE farmer_tool_rent');
       console.log('Database created.');
     } else {
@@ -44,10 +44,21 @@ async function initializeDB() {
     await dbClient.query('DROP TABLE IF EXISTS bookings');
     await dbClient.query('DROP TABLE IF EXISTS tools');
     await dbClient.query('DROP TABLE IF EXISTS users');
+    await dbClient.query('DROP TABLE IF EXISTS admins');
 
     console.log('Creating tables...');
     
-    // Create users table
+    // Create admins table
+    await dbClient.query(`
+      CREATE TABLE admins (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Create users (farmers) table
     await dbClient.query(`
       CREATE TABLE users (
         id SERIAL PRIMARY KEY,
@@ -55,7 +66,6 @@ async function initializeDB() {
         village VARCHAR(255),
         mobile VARCHAR(30) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
-        role VARCHAR(50) DEFAULT 'farmer',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -64,12 +74,12 @@ async function initializeDB() {
     await dbClient.query(`
       CREATE TABLE tools (
         id SERIAL PRIMARY KEY,
-        owner_id INTEGER REFERENCES users(id),
+        owner_id INTEGER REFERENCES admins(id),
         name VARCHAR(255) NOT NULL,
         category VARCHAR(100),
         location VARCHAR(255),
-        price_hour DECIMAL(10, 2) NOT NULL,
-        price_day DECIMAL(10, 2) NOT NULL,
+        price_hour INTEGER NOT NULL,
+        price_day INTEGER NOT NULL,
         description TEXT,
         image TEXT,
         is_available BOOLEAN DEFAULT true,
@@ -88,8 +98,9 @@ async function initializeDB() {
         booking_time VARCHAR(20) NOT NULL,
         hours INTEGER NOT NULL DEFAULT 1,
         address TEXT NOT NULL,
-        total_cost DECIMAL(10, 2) NOT NULL,
+        total_cost INTEGER NOT NULL,
         status VARCHAR(50) DEFAULT 'પેન્ડિંગ',
+        admin_hidden BOOLEAN DEFAULT false,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -98,20 +109,20 @@ async function initializeDB() {
 
     // Seed Admin account
     await dbClient.query(`
-      INSERT INTO users (full_name, mobile, password, role)
-      VALUES ('Admin Access', 'admin', 'admin123', 'admin')
-      ON CONFLICT (mobile) DO NOTHING;
+      INSERT INTO admins (username, password)
+      VALUES ('admin', 'admin123')
+      ON CONFLICT (username) DO NOTHING;
     `);
 
     // Seed Farmer account for testing
     await dbClient.query(`
-      INSERT INTO users (full_name, village, mobile, password, role)
-      VALUES ('રમેશભાઈ પટેલ', 'રાજકોટ', '9999999999', 'password123', 'farmer')
+      INSERT INTO users (full_name, village, mobile, password)
+      VALUES ('રમેશભાઈ पटेल', 'રાજકોટ', '9999999999', 'password123')
       ON CONFLICT (mobile) DO NOTHING;
     `);
 
     // Fetch the admin user id
-    const adminRes = await dbClient.query("SELECT id FROM users WHERE role = 'admin' ORDER BY id ASC LIMIT 1");
+    const adminRes = await dbClient.query("SELECT id FROM admins ORDER BY id ASC LIMIT 1");
     const adminId = adminRes.rows[0]?.id || 1;
 
     // Seed initial tools
@@ -121,14 +132,15 @@ async function initializeDB() {
     `;
 
     const equipmentData = [
-      [adminId, 'John Deere 5310', 'Tractor', 'રાજકોટ', 800, 7000, '55 HP, Power Steering, High torque suitable for all heavy farm applications.', 'https://images.unsplash.com/photo-1592982537447-6f23f8b54964?auto=format&fit=crop&q=80&w=400', true],
-      [adminId, 'Mahindra Arjun Novo', 'Tractor', 'જૂનાગઢ', 750, 6500, 'Powerful performance for tough agricultural tasks.', 'https://plus.unsplash.com/premium_photo-1661913349940-b47214ddc797?auto=format&fit=crop&q=80&w=400', false],
-      [adminId, 'farmtrac 47 promaxx', 'Tractor', 'જામનગર', 900, 9000, 'Advanced tractor with modern tech.', 'https://images.unsplash.com/photo-1610471203597-27ea2a98f1f5?auto=format&fit=crop&q=80&w=400', false],
-      [adminId, 'Electric Corn Thresher', 'Thresher', 'રાજકોટ', 1000, 9000, 'Fast processing of corn kernels.', 'https://images.unsplash.com/photo-1605335955610-1845184b2c15?auto=format&fit=crop&q=80&w=400', false],
-      [adminId, 'Sesame Seeds Thresher', 'Thresher', 'જૂનાગઢ', 900, 8000, 'Gentle and precise separation for sesame.', 'https://images.unsplash.com/photo-1595841696677-647fa54e2fe8?auto=format&fit=crop&q=80&w=400', false],
-      [adminId, 'Combine Harvester', 'Pruning', 'રાજકોટ', 5000, 50000, 'Massive harvesting efficiency.', 'https://plus.unsplash.com/premium_photo-1661908221650-a89e9f9024f2?auto=format&fit=crop&q=80&w=400', false],
-      [adminId, 'Shaktiman Rotavator', 'Sowing', 'અમદાવાદ', 400, 3500, 'Makes soil soft & ready for sowing', 'https://plus.unsplash.com/premium_photo-1661908221650-a89e9f9024f2?auto=format&fit=crop&q=80&w=400', true],
-      [adminId, 'Seed Cum Fertilizer Drill - Dharti Agro', 'Sowing', 'સુરત', 500, 4000, 'Maintains proper seed-to-seed distance', 'https://images.unsplash.com/photo-1530507629858-e4977d30e9e0?auto=format&fit=crop&q=80&w=400', true]
+      [adminId, 'John Deere 5310', 'Tractor', 'રાજકોટ', 800, 7000, '55 HP, Power Steering, High torque suitable for all heavy farm applications.', '/farmer_images/John deere 5310.jpg', true],
+      [adminId, 'Mahindra Arjun Novo', 'Tractor', 'જૂનાગઢ', 750, 6500, 'Powerful performance for tough agricultural tasks.', '/farmer_images/Mahindra Arjun novo.jpg', false],
+      [adminId, 'farmtrac 47 promaxx', 'Tractor', 'જામનગર', 900, 9000, 'Advanced tractor with modern tech.', '/farmer_images/farmtrac 47 promaxx.jpg', false],
+      [adminId, 'Electric Corn Thresher', 'Thresher', 'રાજકોટ', 1000, 9000, 'Fast processing of corn kernels.', '/farmer_images/Electric Corn Threshr_.jpg', false],
+      [adminId, 'Sesame Seeds Thresher', 'Thresher', 'જૂનાગઢ', 900, 8000, 'Gentle and precise separation for sesame.', '/farmer_images/Sesame Seeds Threshr_.jpg', false],
+      [adminId, 'Combine Harvester', 'Pruning', 'રાજકોટ', 5000, 50000, 'Massive harvesting efficiency.', '/farmer_images/Combine Harvester_.jpg', false],
+      [adminId, 'Shaktiman Rotavator', 'Sowing', 'અમદાવાદ', 400, 3500, 'Makes soil soft & ready for sowing', '/farmer_images/shaktiman rotavater_.jpg', true],
+      [adminId, 'Seed Cum Fertilizer Drill - Dharti Agro', 'Sowing', 'સુરત', 500, 4000, 'Maintains proper seed-to-seed distance', '/farmer_images/Seed cum Fertilizer Drill_.jpg', true],
+      [adminId, 'Hydraulic Reversible plough', 'Sowing', 'અમદાવાદ', 600, 4500, 'Deep plowing capability', '/farmer_images/Hydraulic Reversible plough_.jpg', false]
     ];
 
     for (const tool of equipmentData) {

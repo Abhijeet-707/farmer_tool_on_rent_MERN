@@ -21,8 +21,9 @@ const ToolBooking = () => {
   const [time, setTime] = useState('');
   const [address, setAddress] = useState('');
 
-  // Extract numeric price from string like "₹800"
-  const priceNumeric = parseInt((tool.priceHour || tool.price_hour || '800').toString().replace(/\D/g, ''), 10) || 800;
+  // Extract numeric price safely blocking calculation glitches
+  const rawPriceStr = (tool.priceHour || tool.price_hour || '800').toString().replace(/[^0-9.]/g, '');
+  const priceNumeric = Math.round(Number(rawPriceStr)) || 800;
   
   const totalAmount = priceNumeric * hours;
 

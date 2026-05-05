@@ -11,7 +11,7 @@ const FarmerBookings = () => {
 
   useEffect(() => {
     const storedUserStr = localStorage.getItem('farmerUser');
-    const u = storedUserStr ? JSON.parse(storedUserStr) : { id: 2, name: 'રમેશભાઈ', full_name: 'રમેશભાઈ પટેલ' };
+    const u = storedUserStr ? JSON.parse(storedUserStr) : { id: 0, name: 'ખેડૂત મિત્ર' };
     setUser(u);
 
     const fetchUserBookings = async () => {
@@ -48,7 +48,7 @@ const FarmerBookings = () => {
   };
 
   if (!user) return null;
-  const fullName = user.full_name || user.name || 'રમેશભાઈ પટેલ';
+  const fullName = user.name || 'ખેડૂત મિત્ર';
 
   const getStatusPill = (status) => {
     if (status === 'મંજૂર') {

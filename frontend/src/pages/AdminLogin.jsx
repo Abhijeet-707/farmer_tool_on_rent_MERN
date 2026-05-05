@@ -15,16 +15,12 @@ const AdminLogin = () => {
     setError('');
     
     try {
-      const response = await axios.post('http://localhost:5000/api/login', { mobile, password });
+      const response = await axios.post('http://localhost:5000/api/admin/login', { username: mobile, password });
       if (response.data.success) {
-        if (response.data.user.role === 'admin') {
-          navigate('/admin-dashboard');
-        } else {
-          setError('આ ખાતા પાસે એડમિન પરવાનગી નથી. (No Admin Access)');
-        }
+        navigate('/admin-dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'લૉગિન નિષ્ફળ. (Login Failed)');
+      setError(err.response?.data?.message || 'લૉગિન નિષ્ફળ. સાચા માહિતી દાખલ કરો.');
     }
   };
 

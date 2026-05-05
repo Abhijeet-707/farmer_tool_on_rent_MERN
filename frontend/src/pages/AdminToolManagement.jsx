@@ -48,12 +48,17 @@ const AdminToolManagement = () => {
     }
     
     try {
+      const payload = { ...newTool };
+      if (!payload.price_day) {
+        payload.price_day = parseInt(payload.price_hour, 10) * 10;
+      }
+      
       if (editingToolId) {
         // Edit Mode
-        await axios.put(`http://localhost:5000/api/tools/${editingToolId}`, newTool);
+        await axios.put(`http://localhost:5000/api/tools/${editingToolId}`, payload);
       } else {
         // Add Mode
-        await axios.post('http://localhost:5000/api/tools', newTool);
+        await axios.post('http://localhost:5000/api/tools', payload);
       }
       
       // reset form
@@ -63,6 +68,7 @@ const AdminToolManagement = () => {
       fetchTools(); // Refresh the grid
     } catch (error) {
       console.error('Error submitting tool:', error);
+      alert('Failed to save tool: ' + (error.response?.data?.error || error.message || 'Unknown error'));
     }
   };
 
@@ -86,7 +92,8 @@ const AdminToolManagement = () => {
       price_day: tool.price_day || tool.price_hour * 10,
       description: tool.description,
       image: tool.image,
-      location: tool.location || ''
+      location: tool.location || '',
+      is_popular: tool.is_popular || false
     });
     setEditingToolId(tool.id);
     setShowAddForm(true);
@@ -199,7 +206,12 @@ const AdminToolManagement = () => {
                       type="number" 
                       min="0"
                       value={newTool.price_hour}
-                      onChange={(e) => setNewTool({...newTool, price_hour: e.target.value})}
+                      onChange={(e) => {
+                        let val = parseInt(e.target.value, 10);
+                        if (val < 0) val = 0;
+                        setNewTool({...newTool, price_hour: isNaN(val) ? '' : val});
+                      }}
+                      onWheel={(e) => e.target.blur()}
                       className="border border-gray-300 rounded md p-2.5 focus:outline-none focus:border-green-600"
                     />
                   </div>

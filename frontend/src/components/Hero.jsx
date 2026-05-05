@@ -4,7 +4,7 @@ const Hero = () => {
   return (
     <section 
       className="relative h-[500px] flex items-center bg-cover bg-center"
-      style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1595841696677-647fa54e2fe8?q=80&w=2070&auto=format&fit=crop")' }}
+      style={{ backgroundImage: 'url("/farmer_images/back_img.jpg")' }}
     >
       {/* Dark Overlay for better text readability */}
       <div className="absolute inset-0 bg-black/50"></div>

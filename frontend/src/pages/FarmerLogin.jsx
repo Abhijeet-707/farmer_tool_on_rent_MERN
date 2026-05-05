@@ -14,6 +14,26 @@ const FarmerLogin = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Determine and validate if input is email or phone number
+    if (mobile.includes('@')) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(mobile)) {
+        setError('કૃપા કરીને યોગ્ય ઈમેલ આઈડી દાખલ કરો.');
+        return;
+      }
+    } else {
+      const phoneRegex = /^\d+$/;
+      if (!phoneRegex.test(mobile)) {
+        setError('કૃપા કરીને યોગ્ય 10 આંકડાનો મોબાઇલ નંબર અથવા ઈમેલ દાખલ કરો.');
+        return;
+      }
+      if (mobile.length !== 10) {
+        setError('મોબાઇલ નંબર બરાબર 10 આંકડાનો હોવો જોઈએ.');
+        return;
+      }
+    }
+
     try {
       const res = await axios.post('http://localhost:5000/api/login', { mobile, password });
       if (res.data.success) {
@@ -28,12 +48,12 @@ const FarmerLogin = () => {
   return (
     <div className="min-h-screen flex flex-col font-sans bg-[var(--color-brand-light)]">
       <Navbar />
-      
+
       <main className="flex-grow flex items-center justify-center p-4">
         <div className="bg-white rounded-xl shadow-lg w-full max-w-lg overflow-hidden border border-gray-100">
           {/* Thick green top border */}
           <div className="h-3 bg-[var(--color-brand-green)] w-full"></div>
-          
+
           <div className="p-8 sm:p-10">
             {/* Logo */}
             <div className="flex flex-col items-center justify-center gap-1 mb-6">
@@ -63,19 +83,19 @@ const FarmerLogin = () => {
             <form className="space-y-5" onSubmit={handleLogin}>
               <div>
                 <label className="block text-[#1a1a1a] font-semibold text-[15px] mb-2">મોબાઇલ નંબર / ઈમેલ</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={mobile}
                   onChange={(e) => setMobile(e.target.value)}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-[var(--color-brand-green)] focus:ring-1 focus:ring-[var(--color-brand-green)] text-gray-800"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-[#1a1a1a] font-semibold text-[15px] mb-2">પાસવર્ડ</label>
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
